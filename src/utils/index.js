@@ -49,6 +49,36 @@ function replaceStyles(clone, original) {
   }
 }
 
+export function saveGraphJSON(Papers, Edges) {
+  const nodes = Object.values(Papers).map(p => {
+    let group = 2;
+    if (p.seed) group = 1;
+    else if (p.seedsCitedBy > 0) group = 2;
+    else if (p.seedsCited > 0) group = 3;
+    return { id: p.title || `Paper ${p.ID}`, group };
+  });
+
+  const idToTitle = {};
+  Object.values(Papers).forEach(p => {
+    idToTitle[p.ID] = p.title || `Paper ${p.ID}`;
+  });
+
+  const links = Edges.map(e => ({
+    source: idToTitle[e.source],
+    target: idToTitle[e.target]
+  }));
+
+  const graphData = { nodes, links };
+  var blob = new Blob([JSON.stringify(graphData, null, 2)], { type: 'application/json' });
+  var url = URL.createObjectURL(blob);
+  var downloadLink = document.createElement('a');
+  downloadLink.href = url;
+  downloadLink.download = 'citation_graph.json';
+  document.body.appendChild(downloadLink);
+  downloadLink.click();
+  document.body.removeChild(downloadLink);
+}
+
 export function saveSVG(id) {
   var svgElem = document.getElementById(id);
   var clonedNode = svgElem.cloneNode(true);
