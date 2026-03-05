@@ -51,10 +51,10 @@ function replaceStyles(clone, original) {
 
 export function saveGraphJSON(Papers, Edges) {
   const nodes = Object.values(Papers).map(p => {
-    let group = 2;
+    let group;
     if (p.seed) group = 1;
-    else if (p.seedsCitedBy > 0) group = 2;
     else if (p.seedsCited > 0) group = 3;
+    else group = 2;
     return { id: p.title || `Paper ${p.ID}`, group };
   });
 
@@ -69,14 +69,15 @@ export function saveGraphJSON(Papers, Edges) {
   }));
 
   const graphData = { nodes, links };
-  var blob = new Blob([JSON.stringify(graphData, null, 2)], { type: 'application/json' });
-  var url = URL.createObjectURL(blob);
-  var downloadLink = document.createElement('a');
+  const blob = new Blob([JSON.stringify(graphData, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const downloadLink = document.createElement('a');
   downloadLink.href = url;
   downloadLink.download = 'citation_graph.json';
   document.body.appendChild(downloadLink);
   downloadLink.click();
   document.body.removeChild(downloadLink);
+  URL.revokeObjectURL(url);
 }
 
 export function saveSVG(id) {
